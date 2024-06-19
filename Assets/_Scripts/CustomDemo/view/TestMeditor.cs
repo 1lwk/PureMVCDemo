@@ -27,17 +27,18 @@ public class TestMeditor : Mediator
     public override IList<string> ListNotificationInterests()
     {
         // 创建并返回一个包含感兴趣通知的数组。
-        string[] list = new string[2];
+        string[] list = new string[1];
         list[0] = LWK_Facade.UpdateTimer;
         return list;
     }
 
     /// <summary>
     /// 处理接收到的通知消息
-    /// </summary>
+    /// </summary>handleNotification
     /// <param name="notification">通知消息</param>
     public override void HandleNotification(INotification notification)
     {
+        Debug.Log("处理侦听");
         // 根据通知的名称执行相应的操作。
         switch (notification.Name)
         {

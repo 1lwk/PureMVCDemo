@@ -17,17 +17,17 @@ using PureMVC.Patterns;
 namespace PureMVC.Core
 {
     /// <summary>
-    /// A Singleton <c>IView</c> implementation.
+    /// 一个单例 <c>IView</c> 的实现。
     /// </summary>
     /// <remarks>
-    ///     <para>In PureMVC, the <c>View</c> class assumes these responsibilities:</para>
+    ///     <para>在 PureMVC 中，<c>View</c> 类承担以下责任：</para>
     ///     <list type="bullet">
-    ///         <item>Maintain a cache of <c>IMediator</c> instances</item>
-    ///         <item>Provide methods for registering, retrieving, and removing <c>IMediators</c></item>
-    ///         <item>Managing the observer lists for each <c>INotification</c> in the application</item>
-    ///         <item>Providing a method for attaching <c>IObservers</c> to an <c>INotification</c>'s observer list</item>
-    ///         <item>Providing a method for broadcasting an <c>INotification</c></item>
-    ///         <item>Notifying the <c>IObservers</c> of a given <c>INotification</c> when it broadcast</item>
+    ///         <item>维护 <c>IMediator</c> 实例的缓存</item>
+    ///         <item>提供注册、检索和移除 <c>IMediators</c> 的方法</item>
+    ///         <item>管理应用程序中每个 <c>INotification</c> 的观察者列表</item>
+    ///         <item>提供一个方法将 <c>IObservers</c> 附加到 <c>INotification</c> 的观察者列表中</item>
+    ///         <item>提供一个广播 <c>INotification</c> 的方法</item>
+    ///         <item>当广播时，通知给定 <c>INotification</c> 的 <c>IObservers</c></item>
     ///     </list>
     /// </remarks>
 	/// <see cref="PureMVC.Patterns.Mediator"/>
@@ -35,134 +35,134 @@ namespace PureMVC.Core
 	/// <see cref="PureMVC.Patterns.Notification"/>
     public class View : IView
     {
-		#region Constructors
+        #region 构造函数
 
-		/// <summary>
-        /// Constructs and initializes a new view
+        /// <summary>
+        /// 构造并初始化一个新的视图
         /// </summary>
         /// <remarks>
-        /// <para>This <c>IView</c> implementation is a Singleton, so you should not call the constructor directly, but instead call the static Singleton Factory method <c>View.Instance</c></para>
+        /// <para>这个 <c>IView</c> 实现是一个单例，因此不应该直接调用构造函数，而是调用静态单例工厂方法 <c>View.Instance</c></para>
         /// </remarks>
-		protected View()
-		{
-			m_mediatorMap = new Dictionary<string, IMediator>();
-			m_observerMap = new Dictionary<string, IList<IObserver>>();
+        protected View()
+        {
+            m_mediatorMap = new Dictionary<string, IMediator>();
+            m_observerMap = new Dictionary<string, IList<IObserver>>();
             InitializeView();
-		}
-
-		#endregion
-
-		#region Public Methods
-
-		#region IView Members
-
-		#region Observer
-
-		/// <summary>
-		/// Register an <c>IObserver</c> to be notified of <c>INotifications</c> with a given name
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotifications</c> to notify this <c>IObserver</c> of</param>
-		/// <param name="observer">The <c>IObserver</c> to register</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void RegisterObserver(string notificationName, IObserver observer)
-		{
-			lock (m_syncRoot)
-			{
-				if (!m_observerMap.ContainsKey(notificationName))
-				{
-					m_observerMap[notificationName] = new List<IObserver>();
-				}
-
-				m_observerMap[notificationName].Add(observer);
-			}
-		}
-
-		/// <summary>
-		/// Notify the <c>IObservers</c> for a particular <c>INotification</c>
-		/// </summary>
-		/// <param name="notification">The <c>INotification</c> to notify <c>IObservers</c> of</param>
-		/// <remarks>
-		/// <para>All previously attached <c>IObservers</c> for this <c>INotification</c>'s list are notified and are passed a reference to the <c>INotification</c> in the order in which they were registered</para>
-		/// </remarks>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void NotifyObservers(INotification notification)
-		{
-			IList<IObserver> observers = null;
-
-			lock (m_syncRoot)
-			{
-				if (m_observerMap.ContainsKey(notification.Name))
-				{
-					// Get a reference to the observers list for this notification name
-					IList<IObserver> observers_ref = m_observerMap[notification.Name];
-					// Copy observers from reference array to working array, 
-					// since the reference array may change during the notification loop
-					observers = new List<IObserver>(observers_ref);
-				}
-			}
-
-			// Notify outside of the lock
-			if (observers != null)
-			{
-				// Notify Observers from the working array				
-				for (int i = 0; i < observers.Count; i++)
-				{
-					IObserver observer = observers[i];
-					observer.NotifyObserver(notification);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Remove the observer for a given notifyContext from an observer list for a given Notification name.
-		/// </summary>
-		/// <param name="notificationName">which observer list to remove from</param>
-		/// <param name="notifyContext">remove the observer with this object as its notifyContext</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void RemoveObserver(string notificationName, object notifyContext)
-		{
-			lock (m_syncRoot)
-			{
-				// the observer list for the notification under inspection
-				if (m_observerMap.ContainsKey(notificationName))
-				{
-					IList<IObserver> observers = m_observerMap[notificationName];
-
-					// find the observer for the notifyContext
-					for (int i = 0; i < observers.Count; i++)
-					{
-						if (observers[i].CompareNotifyContext(notifyContext))
-						{
-							// there can only be one Observer for a given notifyContext 
-							// in any given Observer list, so remove it and break
-							observers.RemoveAt(i);
-							break;
-						}
-					}
-
-					// Also, when a Notification's Observer list length falls to 
-					// zero, delete the notification key from the observer map
-					if (observers.Count == 0)
-					{
-						m_observerMap.Remove(notificationName);
-					}
-				}
-			}
-		}
+        }
 
         #endregion
 
-        #region Mediator
+        #region 公共方法
+
+        #region IView 成员
+
+        #region 观察者
 
         /// <summary>
-        /// Register an <c>IMediator</c> instance with the <c>View</c>
+        /// 注册一个 <c>IObserver</c> 以接收特定名称的 <c>INotifications</c> 的通知
         /// </summary>
-        /// <param name="mediator">A reference to the <c>IMediator</c> instance</param>
+        /// <param name="notificationName">要通知该 <c>IObserver</c> 的 <c>INotifications</c> 名称</param>
+        /// <param name="observer">要注册的 <c>IObserver</c></param>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
+        public virtual void RegisterObserver(string notificationName, IObserver observer)
+        {
+            lock (m_syncRoot)
+            {
+                if (!m_observerMap.ContainsKey(notificationName))
+                {
+                    m_observerMap[notificationName] = new List<IObserver>();
+                }
+
+                m_observerMap[notificationName].Add(observer);
+            }
+        }
+
+        /// <summary>
+        /// 通知特定 <c>INotification</c> 的 <c>IObservers</c>
+        /// </summary>
+        /// <param name="notification">要通知 <c>IObservers</c> 的 <c>INotification</c></param>
         /// <remarks>
-        ///     <para>Registers the <c>IMediator</c> so that it can be retrieved by name, and further interrogates the <c>IMediator</c> for its <c>INotification</c> interests</para>
-        ///     <para>If the <c>IMediator</c> returns any <c>INotification</c> names to be notified about, an <c>Observer</c> is created encapsulating the <c>IMediator</c> instance's <c>handleNotification</c> method and registering it as an <c>Observer</c> for all <c>INotifications</c> the <c>IMediator</c> is interested in</para>
+        /// <para>所有之前附加到此 <c>INotification</c> 列表的 <c>IObservers</c> 都会被通知，并按注册的顺序传递 <c>INotification</c> 的引用</para>
         /// </remarks>
-        /// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
+        public virtual void NotifyObservers(INotification notification)
+        {
+            IList<IObserver> observers = null;
+
+            lock (m_syncRoot)
+            {
+                if (m_observerMap.ContainsKey(notification.Name))
+                {
+                    // 获取观察者列表的引用
+                    IList<IObserver> observers_ref = m_observerMap[notification.Name];
+                    // 将观察者从引用数组复制到工作数组，
+                    // 因为在通知循环期间引用数组可能会发生变化
+                    observers = new List<IObserver>(observers_ref);
+                }
+            }
+
+            // 在锁外通知
+            if (observers != null)
+            {
+                // 从工作数组中通知观察者				
+                for (int i = 0; i < observers.Count; i++)
+                {
+                    IObserver observer = observers[i];
+                    observer.NotifyObserver(notification);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 从给定通知名称的观察者列表中移除一个特定的观察者
+        /// </summary>
+        /// <param name="notificationName">要从中移除的观察者列表</param>
+        /// <param name="notifyContext">作为其通知上下文的观察者</param>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
+        public virtual void RemoveObserver(string notificationName, object notifyContext)
+        {
+            lock (m_syncRoot)
+            {
+                // 检查通知名称的观察者列表
+                if (m_observerMap.ContainsKey(notificationName))
+                {
+                    IList<IObserver> observers = m_observerMap[notificationName];
+
+                    // 查找特定的观察者
+                    for (int i = 0; i < observers.Count; i++)
+                    {
+                        if (observers[i].CompareNotifyContext(notifyContext))
+                        {
+                            // 在任何给定的观察者列表中，notifyContext 只能有一个观察者
+                            // 移除该观察者并终止循环
+                            observers.RemoveAt(i);
+                            break;
+                        }
+                    }
+
+                    // 当通知的观察者列表长度减少到零时，
+                    // 从观察者映射中删除该通知键
+                    if (observers.Count == 0)
+                    {
+                        m_observerMap.Remove(notificationName);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region 中介者
+
+        /// <summary>
+        /// 向 <c>View</c> 注册一个 <c>IMediator</c> 实例
+        /// </summary>
+        /// <param name="mediator">一个 <c>IMediator</c> 实例的引用</param>
+        /// <remarks>
+        ///     <para>注册 <c>IMediator</c> 以便可以通过名称检索，并进一步查询 <c>IMediator</c> 以了解其 <c>INotification</c> 兴趣</para>
+        ///     <para>如果 <c>IMediator</c> 返回任何感兴趣的 <c>INotification</c> 名称，将创建一个封装了 <c>IMediator</c> 实例的 <c>handleNotification</c> 方法的 <c>Observer</c>，并将其注册为所有 <c>IMediator</c> 感兴趣的 <c>INotifications</c> 的 <c>Observer</c></para>
+        /// </remarks>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
         public virtual void RegisterMediator(IMediator mediator)
         {
             // 使用锁来确保多线程环境下的线程安全
@@ -186,7 +186,7 @@ namespace PureMVC.Core
                     IObserver observer = new Observer("handleNotification", mediator);
 
                     // 为 Mediator 关注的每一个通知注册这个 Observer
-                    for (int i = 0; i < interests.Count-1; i++)
+                    for (int i = 0; i < interests.Count; i++)
                     {
                         RegisterObserver(interests[i].ToString(), observer);
                     }
@@ -199,146 +199,144 @@ namespace PureMVC.Core
 
 
         /// <summary>
-        /// Retrieve an <c>IMediator</c> from the <c>View</c>
+        /// 从 <c>View</c> 中检索一个 <c>IMediator</c> 实例
         /// </summary>
-        /// <param name="mediatorName">The name of the <c>IMediator</c> instance to retrieve</param>
-        /// <returns>The <c>IMediator</c> instance previously registered with the given <c>mediatorName</c></returns>
-        /// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <param name="mediatorName">要检索的 <c>IMediator</c> 实例的名称</param>
+        /// <returns>之前使用给定 <c>mediatorName</c> 注册的 <c>IMediator</c> 实例</returns>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
         public virtual IMediator RetrieveMediator(string mediatorName)
-		{
-			lock (m_syncRoot)
-			{
-				if (!m_mediatorMap.ContainsKey(mediatorName)) return null;
-				return m_mediatorMap[mediatorName];
-			}
-		}
+        {
+            lock (m_syncRoot)
+            {
+                if (!m_mediatorMap.ContainsKey(mediatorName)) return null;
+                return m_mediatorMap[mediatorName];
+            }
+        }
 
-		/// <summary>
-		/// Remove an <c>IMediator</c> from the <c>View</c>
-		/// </summary>
-		/// <param name="mediatorName">The name of the <c>IMediator</c> instance to be removed</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual IMediator RemoveMediator(string mediatorName)
-		{
-			IMediator mediator = null;
+        /// <summary>
+        /// 从 <c>View</c> 中移除一个 <c>IMediator</c>
+        /// </summary>
+        /// <param name="mediatorName">要移除的 <c>IMediator</c> 实例的名称</param>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
+        public virtual IMediator RemoveMediator(string mediatorName)
+        {
+            IMediator mediator = null;
 
-			lock (m_syncRoot)
-			{
-				// Retrieve the named mediator
-				if (!m_mediatorMap.ContainsKey(mediatorName)) return null;
-				mediator = (IMediator) m_mediatorMap[mediatorName];
+            lock (m_syncRoot)
+            {
+                // 检索指定名称的中介者
+                if (!m_mediatorMap.ContainsKey(mediatorName)) return null;
+                mediator = (IMediator)m_mediatorMap[mediatorName];
 
-				// for every notification this mediator is interested in...
-				IList<string> interests = mediator.ListNotificationInterests();
+                // 获取中介者感兴趣的每个通知...
+                IList<string> interests = mediator.ListNotificationInterests();
 
-				for (int i = 0; i < interests.Count; i++)
-				{
-					// remove the observer linking the mediator 
-					// to the notification interest
-					RemoveObserver(interests[i], mediator);
-				}
+                for (int i = 0; i < interests.Count; i++)
+                {
+                    // 移除将中介者与通知兴趣链接起来的观察者
+                    RemoveObserver(interests[i], mediator);
+                }
 
-				// remove the mediator from the map		
-				m_mediatorMap.Remove(mediatorName);
-			}
+                // 从映射中移除中介者		
+                m_mediatorMap.Remove(mediatorName);
+            }
 
-			// alert the mediator that it has been removed
-			if (mediator != null) mediator.OnRemove();
-			return mediator;
-		}
+            // 通知中介者它已经被移除
+            if (mediator != null) mediator.OnRemove();
+            return mediator;
+        }
 
-		/// <summary>
-		/// Check if a Mediator is registered or not
-		/// </summary>
-		/// <param name="mediatorName"></param>
-		/// <returns>whether a Mediator is registered with the given <code>mediatorName</code>.</returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual bool HasMediator(string mediatorName)
-		{
-			lock (m_syncRoot)
-			{
-				return m_mediatorMap.ContainsKey(mediatorName);
-			}
-		}
+        /// <summary>
+        /// 检查是否已注册某个中介者
+        /// </summary>
+        /// <param name="mediatorName"></param>
+        /// <returns>是否注册了具有给定 <code>mediatorName</code> 的中介者。</returns>
+        /// <remarks>这个方法是线程安全的，所有实现中都需要是线程安全的。</remarks>
+        public virtual bool HasMediator(string mediatorName)
+        {
+            lock (m_syncRoot)
+            {
+                return m_mediatorMap.ContainsKey(mediatorName);
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#endregion
+        #endregion
 
-		#endregion
+        #endregion
 
-		#region Accessors
+        #region 访问器
 
-		/// <summary>
-		/// View Singleton Factory method.  This method is thread safe.
-		/// </summary>
-		public static IView Instance
-		{
-			get
-			{
-				if (m_instance == null)
-				{
-					lock (m_staticSyncRoot)
-					{
-						if (m_instance == null) m_instance = new View();
-					}
-				}
+        /// <summary>
+        /// 视图单例工厂方法。 这个方法是线程安全的。
+        /// </summary>
+        public static IView Instance
+        {
+            get
+            {
+                if (m_instance == null)
+                {
+                    lock (m_staticSyncRoot)
+                    {
+                        if (m_instance == null) m_instance = new View();
+                    }
+                }
 
-				return m_instance;
-			}
-		}
+                return m_instance;
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region Protected & Internal Methods
+        #region 受保护的 & 内部方法
 
-		/// <summary>
-        /// Explicit static constructor to tell C# compiler 
-        /// not to mark type as beforefieldinit
+        /// <summary>
+        /// 显式静态构造函数告诉 C# 编译器不要将类型标记为 beforefieldinit
         /// </summary>
         static View()
         {
-		}
+        }
 
         /// <summary>
-        /// Initialize the Singleton View instance
+        /// 初始化单例 View 实例
         /// </summary>
         /// <remarks>
-        /// <para>Called automatically by the constructor, this is your opportunity to initialize the Singleton instance in your subclass without overriding the constructor</para>
+        /// <para>由构造函数自动调用，这是您在不覆盖构造函数的情况下在子类中初始化单例实例的机会</para>
         /// </remarks>
         protected virtual void InitializeView()
-		{
-		}
+        {
+        }
 
-		#endregion
+        #endregion
 
-		#region Members
-
-		/// <summary>
-        /// Mapping of Mediator names to Mediator instances
-        /// </summary>
-		protected IDictionary<string, IMediator> m_mediatorMap;
+        #region 成员
 
         /// <summary>
-        /// Mapping of Notification names to Observer lists
+        /// 中介者名称到中介者实例的映射
+        /// </summary>
+        protected IDictionary<string, IMediator> m_mediatorMap;
+
+        /// <summary>
+        /// 通知名称到观察者列表的映射
         /// </summary>
 		protected IDictionary<string, IList<IObserver>> m_observerMap;
-		
+
         /// <summary>
-        /// Singleton instance
+        /// 单例实例
         /// </summary>
-		protected static volatile IView m_instance;
+        protected static volatile IView m_instance;
 
-		/// <summary>
-		/// Used for locking
-		/// </summary>
-		protected readonly object m_syncRoot = new object();
+        /// <summary>
+        /// 用于锁定
+        /// </summary>
+        protected readonly object m_syncRoot = new object();
 
-		/// <summary>
-		/// Used for locking the instance calls
-		/// </summary>
-		protected static readonly object m_staticSyncRoot = new object();
+        /// <summary>
+        /// 用于锁定实例调用
+        /// </summary>
+        protected static readonly object m_staticSyncRoot = new object();
 
-		#endregion
-	}
+        #endregion
+    }
 }

@@ -36,6 +36,7 @@ public class LWK_Facade : Facade
         base.InitializeController();
         // 注册启动命令，关联到 TestStartUPCommand 类。
         this.RegisterCommand(LWK_Facade.StartUP, typeof(TestStartUPCommand));
+
         // 注册询问计时器命令，关联到 TestCommand 类。
         this.RegisterCommand(LWK_Facade.AskRefTimer, typeof(TestCommand));
     }

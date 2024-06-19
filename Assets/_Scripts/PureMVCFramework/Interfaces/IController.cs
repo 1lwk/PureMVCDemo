@@ -1,10 +1,4 @@
-﻿/* 
- PureMVC C# Port by Andy Adamczak <andy.adamczak@puremvc.org>, et al.
- PureMVC - Copyright(c) 2006-08 Futurescale, Inc., Some rights reserved. 
- Your reuse is governed by the Creative Commons Attribution 3.0 License 
-*/
-
-#region Using
+﻿#region Using
 
 using System;
 
@@ -13,45 +7,45 @@ using System;
 namespace PureMVC.Interfaces
 {
     /// <summary>
-    /// The interface definition for a PureMVC Controller
+    /// PureMVC 控制器接口定义
     /// </summary>
     /// <remarks>
-    ///     <para>In PureMVC, an <c>IController</c> implementor follows the 'Command and Controller' strategy, and assumes these responsibilities:</para>
-    ///     <list type="bullet">
-    ///         <item>Remembering which <c>ICommand</c>s are intended to handle which <c>INotifications</c></item>
-    ///         <item>Registering itself as an <c>IObserver</c> with the <c>View</c> for each <c>INotification</c> that it has an <c>ICommand</c> mapping for</item>
-    ///         <item>Creating a new instance of the proper <c>ICommand</c> to handle a given <c>INotification</c> when notified by the <c>View</c></item>
-    ///         <item>Calling the <c>ICommand</c>'s <c>execute</c> method, passing in the <c>INotification</c></item>
-    ///     </list>
+    /// 在 PureMVC 中，<c>IController</c> 实现者遵循 'Command 和 Controller' 策略，并承担以下职责：
+    /// <list type="bullet">
+    ///     <item>记住哪些 <c>ICommand</c> 处理哪些 <c>INotification</c></item>
+    ///     <item>为每个有 <c>ICommand</c> 映射的 <c>INotification</c> 注册自己作为 <c>View</c> 的 <c>IObserver</c></item>
+    ///     <item>在收到 <c>View</c> 的通知时，为给定的 <c>INotification</c> 创建一个新的 <c>ICommand</c> 实例</item>
+    ///     <item>调用 <c>ICommand</c> 的 <c>execute</c> 方法，传递 <c>INotification</c></item>
+    /// </list>
     /// </remarks>
-	/// <see cref="PureMVC.Interfaces.INotification"/>
-	/// <see cref="PureMVC.Interfaces.ICommand"/>
+    /// <see cref="PureMVC.Interfaces.INotification"/>
+    /// <see cref="PureMVC.Interfaces.ICommand"/>
     public interface IController
     {
         /// <summary>
-        /// Register a particular <c>ICommand</c> class as the handler for a particular <c>INotification</c>
+        /// 注册特定的 <c>ICommand</c> 类来处理特定的 <c>INotification</c>
         /// </summary>
-        /// <param name="notificationName">The name of the <c>INotification</c></param>
-        /// <param name="commandType">The <c>Type</c> of the <c>ICommand</c></param>
+        /// <param name="notificationName">通知名称</param>
+        /// <param name="commandType">命令类型</param>
         void RegisterCommand(string notificationName, Type commandType);
 
         /// <summary>
-        /// Execute the <c>ICommand</c> previously registered as the handler for <c>INotification</c>s with the given notification name
+        /// 执行先前注册为处理具有给定通知名称的 <c>INotification</c> 的 <c>ICommand</c>
         /// </summary>
-        /// <param name="notification">The <c>INotification</c> to execute the associated <c>ICommand</c> for</param>
-		void ExecuteCommand(INotification notification);
+        /// <param name="notification">要为其执行关联 <c>ICommand</c> 的通知</param>
+        void ExecuteCommand(INotification notification);
 
         /// <summary>
-        /// Remove a previously registered <c>ICommand</c> to <c>INotification</c> mapping.
+        /// 移除先前注册的 <c>ICommand</c> 到 <c>INotification</c> 的映射
         /// </summary>
-        /// <param name="notificationName">The name of the <c>INotification</c> to remove the <c>ICommand</c> mapping for</param>
-		void RemoveCommand(string notificationName);
+        /// <param name="notificationName">要移除 <c>ICommand</c> 映射的通知名称</param>
+        void RemoveCommand(string notificationName);
 
-		/// <summary>
-		/// Check if a Command is registered for a given Notification.
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotification</c> to check the <c>ICommand</c> mapping for</param>
-		/// <returns>whether a Command is currently registered for the given <c>notificationName</c>.</returns>
-		bool HasCommand(string notificationName);
-	}
+        /// <summary>
+        /// 检查是否为给定的通知名称注册了命令
+        /// </summary>
+        /// <param name="notificationName">要检查 <c>ICommand</c> 映射的通知名称</param>
+        /// <returns>是否已为给定的通知名称注册命令</returns>
+        bool HasCommand(string notificationName);
+    }
 }

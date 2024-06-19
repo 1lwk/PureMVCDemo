@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  PureMVC C# Port by Andy Adamczak <andy.adamczak@puremvc.org>, et al.
  PureMVC - Copyright(c) 2006-08 Futurescale, Inc., Some rights reserved. 
  Your reuse is governed by the Creative Commons Attribution 3.0 License 
@@ -17,230 +17,231 @@ using PureMVC.Patterns;
 namespace PureMVC.Core
 {
     /// <summary>
-    /// A Singleton <c>IController</c> implementation.
+    /// 单例模式的 <c>IController</c> 实现。
     /// </summary>
     /// <remarks>
-    /// 	<para>In PureMVC, the <c>Controller</c> class follows the 'Command and Controller' strategy, and assumes these responsibilities:</para>
+    /// 	<para>在 PureMVC 中，<c>Controller</c> 类遵循 'Command 和 Controller' 策略，并承担以下职责：</para>
     /// 	<list type="bullet">
-    /// 		<item>Remembering which <c>ICommand</c>s are intended to handle which <c>INotifications</c>.</item>
-    /// 		<item>Registering itself as an <c>IObserver</c> with the <c>View</c> for each <c>INotification</c> that it has an <c>ICommand</c> mapping for.</item>
-    /// 		<item>Creating a new instance of the proper <c>ICommand</c> to handle a given <c>INotification</c> when notified by the <c>View</c>.</item>
-    /// 		<item>Calling the <c>ICommand</c>'s <c>execute</c> method, passing in the <c>INotification</c>.</item>
+    /// 		<item>记住哪些 <c>ICommand</c> 处理哪些 <c>INotification</c>。</item>
+    /// 		<item>为每个有 <c>ICommand</c> 映射的 <c>INotification</c> 注册自己作为 <c>View</c> 的 <c>IObserver</c>。</item>
+    /// 		<item>在收到 <c>View</c> 的通知时，为给定的 <c>INotification</c> 创建一个新的 <c>ICommand</c> 实例。</item>
+    /// 		<item>调用 <c>ICommand</c> 的 <c>execute</c> 方法，传递 <c>INotification</c>。</item>
     /// 	</list>
-    /// 	<para>Your application must register <c>ICommands</c> with the <c>Controller</c>.</para>
-    /// 	<para>The simplest way is to subclass <c>Facade</c>, and use its <c>initializeController</c> method to add your registrations.</para>
+    /// 	<para>应用程序必须在 <c>Controller</c> 中注册 <c>ICommand</c>。</para>
+    /// 	<para>最简单的方法是继承 <c>Facade</c>，并使用其 <c>initializeController</c> 方法来添加注册。</para>
     /// </remarks>
-	/// <see cref="PureMVC.Core.View"/>
-	/// <see cref="PureMVC.Patterns.Observer"/>
-	/// <see cref="PureMVC.Patterns.Notification"/>
-	/// <see cref="PureMVC.Patterns.SimpleCommand"/>
-	/// <see cref="PureMVC.Patterns.MacroCommand"/>
+    /// <see cref="PureMVC.Core.View"/>
+    /// <see cref="PureMVC.Patterns.Observer"/>
+    /// <see cref="PureMVC.Patterns.Notification"/>
+    /// <see cref="PureMVC.Patterns.SimpleCommand"/>
+    /// <see cref="PureMVC.Patterns.MacroCommand"/>
     public class Controller : IController
-	{
-		#region Constructors
+    {
+        #region 构造函数
 
-		/// <summary>
-        /// Constructs and initializes a new controller
+        /// <summary>
+        /// 构造并初始化一个新的控制器
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         This <c>IController</c> implementation is a Singleton, 
-        ///         so you should not call the constructor 
-        ///         directly, but instead call the static Singleton
-        ///         Factory method <c>Controller.getInstance()</c>
+        ///         这个 <c>IController</c> 实现是一个单例，
+        ///         所以不应该直接调用构造函数，
+        ///         而是调用静态单例工厂方法 <c>Controller.Instance</c>
         ///     </para>
         /// </remarks>
-		protected Controller()
-		{
-			m_commandMap = new Dictionary<string, Type>();	
-			InitializeController();
-		}
+        protected Controller()
+        {
+            m_commandMap = new Dictionary<string, Type>();
+            InitializeController();
+        }
 
-		#endregion
+        #endregion
 
-		#region Public Methods
+        #region 公共方法
 
-		#region IController Members
+        #region IController 成员
 
-		/// <summary>
-		/// If an <c>ICommand</c> has previously been registered
-		/// to handle a the given <c>INotification</c>, then it is executed.
-		/// </summary>
-		/// <param name="note">An <c>INotification</c></param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void ExecuteCommand(INotification note)
-		{
-			Type commandType = null;
-
-			lock (m_syncRoot)
-			{
-				if (!m_commandMap.ContainsKey(note.Name)) return;
-				commandType = m_commandMap[note.Name];
-			}
-
-			object commandInstance = Activator.CreateInstance(commandType);  ///创建命令的实例  Activator.CreateInstance创建某个类型的实例的apI
-
-			if (commandInstance is ICommand)
-			{
-				((ICommand) commandInstance).Execute(note);
-			}
-		}
-
-		/// <summary>
-		/// Register a particular <c>ICommand</c> class as the handler
-		/// for a particular <c>INotification</c>.
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotification</c></param>
-		/// <param name="commandType">The <c>Type</c> of the <c>ICommand</c></param>
-		/// <remarks>
-		///     <para>
-		///         If an <c>ICommand</c> has already been registered to 
-		///         handle <c>INotification</c>s with this name, it is no longer
-		///         used, the new <c>ICommand</c> is used instead.
-		///     </para>
-		/// </remarks> 
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void RegisterCommand(string notificationName, Type commandType)
-		{
-			lock (m_syncRoot)
-			{
-				if (!m_commandMap.ContainsKey(notificationName))
-				{
-					// This call needs to be monitored carefully. Have to make sure that RegisterObserver
-					// doesn't call back into the controller, or a dead lock could happen.
-					m_view.RegisterObserver(notificationName, new Observer("ExecuteCommand", this));
-				}
-
-				m_commandMap[notificationName] = commandType;
-			}
-		}
-
-		/// <summary>
-		/// Check if a Command is registered for a given Notification 
-		/// </summary>
-		/// <param name="notificationName"></param>
-		/// <returns>whether a Command is currently registered for the given <c>notificationName</c>.</returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual bool HasCommand(string notificationName)
-		{
-			lock (m_syncRoot)
-			{
-				return m_commandMap.ContainsKey(notificationName);
-			}
-		}
-
-		/// <summary>
-		/// Remove a previously registered <c>ICommand</c> to <c>INotification</c> mapping.
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotification</c> to remove the <c>ICommand</c> mapping for</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void RemoveCommand(string notificationName)
-		{
-			lock (m_syncRoot)
-			{
-				if (m_commandMap.ContainsKey(notificationName))
-				{
-					// remove the observer
-
-					// This call needs to be monitored carefully. Have to make sure that RemoveObserver
-					// doesn't call back into the controller, or a dead lock could happen.
-					m_view.RemoveObserver(notificationName, this);
-					m_commandMap.Remove(notificationName);
-				}
-			}
-		}
-
-		#endregion
-
-		#endregion
-
-		#region Accessors
-
-		/// <summary>
-		/// Singleton Factory method.  This method is thread safe.
-		/// </summary>
-		public static IController Instance
-		{
-			get
-			{
-				if (m_instance == null)
-				{
-					lock (m_staticSyncRoot)
-					{
-						if (m_instance == null) m_instance = new Controller();
-					}
-				}
-
-				return m_instance;
-			}
-		}
-
-		#endregion
-
-		#region Protected & Internal Methods
-
-		/// <summary>
-		/// Explicit static constructor to tell C# compiler
-		/// not to mark type as beforefieldinit
-		/// </summary>
-		static Controller()
-		{
-		}
-
-		/// <summary>
-		/// Initialize the Singleton <c>Controller</c> instance
-		/// </summary>
-		/// <remarks>
-		///     <para>Called automatically by the constructor</para>
-		///     
-		///     <para>
-		///         Note that if you are using a subclass of <c>View</c>
-		///         in your application, you should also subclass <c>Controller</c>
-		///         and override the <c>initializeController</c> method in the following way:
-		///     </para>
-		/// 
-		///     <c>
-		///         // ensure that the Controller is talking to my IView implementation
-		///         public override void initializeController()
-		///         {
-		///             view = MyView.Instance;
-		///         }
-		///     </c>
-		/// </remarks>
-		protected virtual void InitializeController()
-		{
-			m_view = View.Instance;
-		}
-
-		#endregion
-
-		#region Members
-
-		/// <summary>
-        /// Local reference to View
-        /// </summary>
-		protected IView m_view;
-		
         /// <summary>
-        /// Mapping of Notification names to Command Class references
+        /// 如果已注册了 <c>ICommand</c> 以处理给定的 <c>INotification</c>，则执行该命令。
+        /// </summary>
+        /// <param name="note">一个 <c>INotification</c></param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
+        public virtual void ExecuteCommand(INotification note)
+        {
+            // 定义一个变量用于存储命令类型
+            Type commandType = null;
+
+            // 锁定代码块，以确保线程安全
+            lock (m_syncRoot)
+            {
+                // 如果命令映射表中不包含通知名称，直接返回
+                if (!m_commandMap.ContainsKey(note.Name)) return;
+
+                // 从命令映射表中获取对应通知名称的命令类型
+                commandType = m_commandMap[note.Name];
+            }
+
+            // 使用 反射机制 动态创建命令类型的实例
+            object commandInstance = Activator.CreateInstance(commandType);
+
+            // 检查创建的实例是否实现了 ICommand 接口
+            if (commandInstance is ICommand)
+            {
+                // 如果是 ICommand 实例，则调用其 Execute 方法并传递通知对象
+                ((ICommand)commandInstance).Execute(note);
+            }
+        }
+
+
+        /// <summary>
+        /// 注册特定的 <c>ICommand</c> 类来处理特定的 <c>INotification</c>。
+        /// </summary>
+        /// <param name="notificationName">通知名称</param>
+        /// <param name="commandType">命令类型</param>
+        /// <remarks>
+        ///     <para>
+        ///         如果已经注册了 <c>ICommand</c> 来处理具有该名称的 <c>INotification</c>，
+        ///         则不再使用旧的 <c>ICommand</c>，而是使用新的 <c>ICommand</c>。
+        ///     </para>
+        /// </remarks>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
+        public virtual void RegisterCommand(string notificationName, Type commandType)
+        {
+            lock (m_syncRoot)
+            {
+                if (!m_commandMap.ContainsKey(notificationName))
+                {
+                    // 需要仔细监控此调用。必须确保 RegisterObserver 不会回调到控制器，否则可能会发生死锁。
+                    m_view.RegisterObserver(notificationName, new Observer("ExecuteCommand", this));
+                }
+
+                m_commandMap[notificationName] = commandType;
+            }
+        }
+
+        /// <summary>
+        /// 检查是否为给定的通知注册了命令
+        /// </summary>
+        /// <param name="notificationName">通知名称</param>
+        /// <returns>是否已为给定的通知名称注册了命令。</returns>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
+        public virtual bool HasCommand(string notificationName)
+        {
+            lock (m_syncRoot)
+            {
+                return m_commandMap.ContainsKey(notificationName);
+            }
+        }
+
+        /// <summary>
+        /// 移除先前注册的 <c>ICommand</c> 到 <c>INotification</c> 的映射。
+        /// </summary>
+        /// <param name="notificationName">要移除 <c>ICommand</c> 映射的通知名称</param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
+        public virtual void RemoveCommand(string notificationName)
+        {
+            lock (m_syncRoot)
+            {
+                if (m_commandMap.ContainsKey(notificationName))
+                {
+                    // 移除观察者
+
+                    // 需要仔细监控此调用。必须确保 RemoveObserver 不会回调到控制器，否则可能会发生死锁。
+                    m_view.RemoveObserver(notificationName, this);
+                    m_commandMap.Remove(notificationName);
+                }
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region 访问器
+
+        /// <summary>
+        /// 单例工厂方法。此方法是线程安全的。
+        /// </summary>
+        public static IController Instance
+        {
+            get
+            {
+                if (m_instance == null)
+                {
+                    lock (m_staticSyncRoot)
+                    {
+                        if (m_instance == null) m_instance = new Controller();
+                    }
+                }
+
+                return m_instance;
+            }
+        }
+
+        #endregion
+
+        #region 保护和内部方法
+
+        /// <summary>
+        /// 显式静态构造函数告诉 C# 编译器不要将类型标记为 beforefieldinit
+        /// </summary>
+        static Controller()
+        {
+        }
+
+        /// <summary>
+        /// 初始化单例 <c>Controller</c> 实例
+        /// </summary>
+        /// <remarks>
+        ///     <para>由构造函数自动调用</para>
+        ///     
+        ///     <para>
+        ///         请注意，如果在应用程序中使用的是 <c>View</c> 的子类，
+        ///         还应该继承 <c>Controller</c> 并在以下方式中重写 <c>initializeController</c> 方法：
+        ///     </para>
+        /// 
+        ///     <c>
+        ///         // 确保 Controller 与我的 IView 实现进行通信
+        ///         public override void initializeController()
+        ///         {
+        ///             view = MyView.Instance;
+        ///         }
+        ///     </c>
+        /// </remarks>
+        protected virtual void InitializeController()
+        {
+            m_view = View.Instance;
+        }
+
+        #endregion
+
+        #region 成员
+
+        /// <summary>
+        /// 本地对 View 的引用
+        /// </summary>
+        protected IView m_view;
+
+        /// <summary>
+        /// 通知名称到命令类引用的映射
         /// </summary>
         protected IDictionary<string, Type> m_commandMap;
 
         /// <summary>
-        /// Singleton instance, can be sublcassed though....
+        /// 单例实例，可以被子类化....
         /// </summary>
-		protected static volatile IController m_instance;
+        protected static volatile IController m_instance;
 
-		/// <summary>
-		/// Used for locking
-		/// </summary>
-		protected readonly object m_syncRoot = new object();
+        /// <summary>
+        /// 用于锁定
+        /// </summary>
+        protected readonly object m_syncRoot = new object();
 
-		/// <summary>
-		/// Used for locking the instance calls
-		/// </summary>
-		protected static readonly object m_staticSyncRoot = new object();
+        /// <summary>
+        /// 用于锁定实例调用
+        /// </summary>
+        protected static readonly object m_staticSyncRoot = new object();
 
-		#endregion
-	}
+        #endregion
+    }
 }

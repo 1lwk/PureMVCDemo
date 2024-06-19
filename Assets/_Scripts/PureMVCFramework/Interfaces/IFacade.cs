@@ -14,11 +14,11 @@ using UnityEngine;
 namespace PureMVC.Interfaces
 {
     /// <summary>
-    /// The interface definition for a PureMVC Facade
+    /// PureMVC Facade的接口定义
     /// </summary>
     /// <remarks>
-    ///     <para>The Facade Pattern suggests providing a single class to act as a certal point of communication for subsystems</para>
-    ///     <para>In PureMVC, the Facade acts as an interface between the core MVC actors (Model, View, Controller) and the rest of your application</para>
+    ///     <para>外观模式建议提供一个单一类作为子系统通信的中心点</para>
+    ///     <para>在PureMVC中，Facade作为核心MVC参与者（Model、View、Controller）与应用程序其余部分之间的接口</para>
     /// </remarks>
 	/// <see cref="PureMVC.Interfaces.IModel"/>
 	/// <see cref="PureMVC.Interfaces.IView"/>
@@ -26,104 +26,104 @@ namespace PureMVC.Interfaces
 	/// <see cref="PureMVC.Interfaces.ICommand"/>
 	/// <see cref="PureMVC.Interfaces.INotification"/>
     public interface IFacade : INotifier
-	{
-		#region Proxy
-
-		/// <summary>
-        /// Register an <c>IProxy</c> with the <c>Model</c> by name
-        /// </summary>
-        /// <param name="proxy">The <c>IProxy</c> to be registered with the <c>Model</c></param>
-		void RegisterProxy(IProxy proxy);
+    {
+        #region Proxy
 
         /// <summary>
-        /// Retrieve a <c>IProxy</c> from the <c>Model</c> by name
+        /// 通过名称向<c>Model</c>注册<c>IProxy</c>
         /// </summary>
-        /// <param name="proxyName">The name of the <c>IProxy</c> instance to be retrieved</param>
-        /// <returns>The <c>IProxy</c> previously regisetered by <c>proxyName</c> with the <c>Model</c></returns>
+        /// <param name="proxy">要向<c>Model</c>注册的<c>IProxy</c></param>
+        void RegisterProxy(IProxy proxy);
+
+        /// <summary>
+        /// 通过名称从<c>Model</c>检索<c>IProxy</c>
+        /// </summary>
+        /// <param name="proxyName">要检索的<c>IProxy</c>实例的名称</param>
+        /// <returns>之前通过<c>proxyName</c>注册的<c>IProxy</c></returns>
 		IProxy RetrieveProxy(string proxyName);
-		
+
         /// <summary>
-        /// Remove an <c>IProxy</c> instance from the <c>Model</c> by name
+        /// 通过名称从<c>Model</c>移除<c>IProxy</c>实例
         /// </summary>
-        /// <param name="proxyName">The <c>IProxy</c> to remove from the <c>Model</c></param>
+        /// <param name="proxyName">要从<c>Model</c>移除的<c>IProxy</c></param>
         IProxy RemoveProxy(string proxyName);
 
-		/// <summary>
-		/// Check if a Proxy is registered
-		/// </summary>
-		/// <param name="proxyName">The name of the <c>IProxy</c> instance to check</param>
-		/// <returns>whether a Proxy is currently registered with the given <c>proxyName</c>.</returns>
-		bool HasProxy(string proxyName);
-
-		#endregion
-
-		#region Command
-
-		/// <summary>
-        /// Register an <c>ICommand</c> with the <c>Controller</c>
+        /// <summary>
+        /// 检查是否注册了一个Proxy
         /// </summary>
-        /// <param name="notificationName">The name of the <c>INotification</c> to associate the <c>ICommand</c> with.</param>
-        /// <param name="commandType">A reference to the <c>Type</c> of the <c>ICommand</c></param>
+        /// <param name="proxyName">要检查的<c>IProxy</c>实例的名称</param>
+        /// <returns>是否已经注册了具有给定<c>proxyName</c>的Proxy</returns>
+        bool HasProxy(string proxyName);
+
+        #endregion
+
+        #region Command
+
+        /// <summary>
+        /// 向<c>Controller</c>注册<c>ICommand</c>
+        /// </summary>
+        /// <param name="notificationName">与<c>ICommand</c>关联的<c>INotification</c>的名称</param>
+        /// <param name="commandType">与<c>ICommand</c>关联的<c>Type</c>引用</param>
         void RegisterCommand(string notificationName, Type commandType);
 
         /// <summary>
-        /// Remove a previously registered <c>ICommand</c> to <c>INotification</c> mapping from the Controller.
+        /// 从Controller中移除先前注册的<c>ICommand</c>与<c>INotification</c>的映射。
         /// </summary>
-        /// <param name="notificationName">TRemove a previously registered <c>ICommand</c> to <c>INotification</c> mapping from the Controller.</param>
+        /// <param name="notificationName">从Controller中移除先前注册的<c>ICommand</c>与<c>INotification</c>的映射。</param>
 		void RemoveCommand(string notificationName);
 
-		/// <summary>
-		/// Check if a Command is registered for a given Notification 
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotification</c> to check.</param>
-		/// <returns>whether a Command is currently registered for the given <c>notificationName</c>.</returns>
-		bool HasCommand(string notificationName);
-
-		#endregion
-
-		#region Mediator
-
-		/// <summary>
-        /// Register an <c>IMediator</c> instance with the <c>View</c>
+        /// <summary>
+        /// 检查是否为给定的Notification注册了Command
         /// </summary>
-        /// <param name="mediator">A reference to the <c>IMediator</c> instance</param>
-		void RegisterMediator(IMediator mediator);
+        /// <param name="notificationName">要检查的<c>INotification</c>的名称。</param>
+        /// <returns>是否为给定的<c>notificationName</c>注册了Command。</returns>
+        bool HasCommand(string notificationName);
+
+        #endregion
+
+        #region Mediator
 
         /// <summary>
-        /// Retrieve an <c>IMediator</c> instance from the <c>View</c>
+        /// 向<c>View</c>注册<c>IMediator</c>实例
         /// </summary>
-        /// <param name="mediatorName">The name of the <c>IMediator</c> instance to retrieve</param>
-        /// <returns>The <c>IMediator</c> previously registered with the given <c>mediatorName</c></returns>
+        /// <param name="mediator">对<c>IMediator</c>实例的引用</param>
+        void RegisterMediator(IMediator mediator);
+
+        /// <summary>
+        /// 从<c>View</c>检索<c>IMediator</c>实例
+        /// </summary>
+        /// <param name="mediatorName">要检索的<c>IMediator</c>实例的名称</param>
+        /// <returns>之前通过给定<c>mediatorName</c>注册的<c>IMediator</c></returns>
 		IMediator RetrieveMediator(string mediatorName);
 
         /// <summary>
-        /// Remove a <c>IMediator</c> instance from the <c>View</c>
+        /// 从<c>View</c>移除<c>IMediator</c>实例
         /// </summary>
-        /// <param name="mediatorName">The name of the <c>IMediator</c> instance to be removed</param>
+        /// <param name="mediatorName">要移除的<c>IMediator</c>实例的名称</param>
         IMediator RemoveMediator(string mediatorName);
 
-		/// <summary>
-		/// Check if a Mediator is registered or not
-		/// </summary>
-		/// <param name="mediatorName">The name of the <c>IMediator</c> instance to check</param>
-		/// <returns>whether a Mediator is registered with the given <c>mediatorName</c>.</returns>
-		bool HasMediator(string mediatorName);
+        /// <summary>
+        /// 检查是否注册了Mediator
+        /// </summary>
+        /// <param name="mediatorName">要检查的<c>IMediator</c>实例的名称</param>
+        /// <returns>是否注册了具有给定<c>mediatorName</c>的Mediator</returns>
+        bool HasMediator(string mediatorName);
 
-		#endregion
+        #endregion
 
-		#region Observer
+        #region Observer
 
-		/// <summary>
-		/// Notify the <c>IObservers</c> for a particular <c>INotification</c>.
-		/// <para>All previously attached <c>IObservers</c> for this <c>INotification</c>'s list are notified and are passed a reference to the <c>INotification</c> in the order in which they were registered.</para>
-		/// <para>NOTE: Use this method only if you are sending custom Notifications. Otherwise use the sendNotification method which does not require you to create the Notification instance.</para>
-		/// </summary>
-		/// <param name="note">the <c>INotification</c> to notify <c>IObservers</c> of.</param>
-		void NotifyObservers(INotification note);
+        /// <summary>
+        /// 通知特定<c>INotification</c>的<c>IObservers</c>。
+        /// <para>所有先前为该<c>INotification</c>列表附加的<c>IObservers</c>都会被通知，并按它们注册的顺序传递一个<c>INotification</c>引用。</para>
+        /// <para>注意：仅在发送自定义通知时使用此方法。否则使用不需要创建通知实例的sendNotification方法。</para>
+        /// </summary>
+        /// <param name="note">要通知<c>IObservers</c>的<c>INotification</c>。</param>
+        void NotifyObservers(INotification note);
 
-		#endregion
+        #endregion
 
-        //SimpleFramework Code By Jarjin lee
+        // SimpleFramework 代码由 Jarjin lee 编写
         void AddManager(string typeName, object obj);
 
         T AddManager<T>(string typeName) where T : Component;
@@ -131,5 +131,5 @@ namespace PureMVC.Interfaces
         T GetManager<T>(string typeName) where T : class;
 
         void RemoveManager(string typeName);
-	}
+    }
 }

@@ -17,77 +17,77 @@ using PureMVC.Patterns;
 namespace PureMVC.Patterns
 {
     /// <summary>
-    /// A base <c>ICommand</c> implementation that executes other <c>ICommand</c>s
+    /// 一个基础 <c>ICommand</c> 实现，用于执行其他 <c>ICommand</c>。
     /// </summary>
     /// <remarks>
-    ///     <para>A <c>MacroCommand</c> maintains an list of <c>ICommand</c> Class references called <i>SubCommands</i></para>
-    ///     <para>When <c>execute</c> is called, the <c>MacroCommand</c> instantiates and calls <c>execute</c> on each of its <i>SubCommands</i> turn. Each <i>SubCommand</i> will be passed a reference to the original <c>INotification</c> that was passed to the <c>MacroCommand</c>'s <c>execute</c> method</para>
-    ///     <para>Unlike <c>SimpleCommand</c>, your subclass should not override <c>execute</c>, but instead, should override the <c>initializeMacroCommand</c> method, calling <c>addSubCommand</c> once for each <i>SubCommand</i> to be executed</para>
+    ///     <para><c>MacroCommand</c> 维护一个 <c>ICommand</c> 类引用的列表，称为 <i>SubCommands</i>。</para>
+    ///     <para>当调用 <c>execute</c> 时，<c>MacroCommand</c> 会实例化并依次调用每个 <i>SubCommands</i> 的 <c>execute</c> 方法。每个 <i>SubCommand</i> 都会被传递一个引用，指向最初传递给 <c>MacroCommand</c> 的 <c>INotification</c>。</para>
+    ///     <para>与 <c>SimpleCommand</c> 不同，你的子类不应该重写 <c>execute</c>，而是应该重写 <c>initializeMacroCommand</c> 方法，并调用 <c>addSubCommand</c> 一次，以便每个 <i>SubCommand</i> 都被执行。</para>
     /// </remarks>
 	/// <see cref="PureMVC.Core.Controller"/>
 	/// <see cref="PureMVC.Patterns.Notification"/>
 	/// <see cref="PureMVC.Patterns.SimpleCommand"/>
     public class MacroCommand : Notifier, ICommand, INotifier
-	{
-		#region Constructors
+    {
+        #region 构造函数
 
-		/// <summary>
-        /// Constructs a new macro command
+        /// <summary>
+        /// 构造一个新的宏命令
         /// </summary>
         /// <remarks>
-        ///     <para>You should not need to define a constructor, instead, override the <c>initializeMacroCommand</c> method</para>
-        ///     <para>If your subclass does define a constructor, be sure to call <c>super()</c></para>
+        ///     <para>你不需要定义构造函数，而是重写 <c>initializeMacroCommand</c> 方法。</para>
+        ///     <para>如果你的子类确实定义了构造函数，请确保调用 <c>super()</c>。</para>
         /// </remarks>
-		public MacroCommand()
-		{
-			m_subCommands = new List<Type>();
-			InitializeMacroCommand();
-		}
+        public MacroCommand()
+        {
+            m_subCommands = new List<Type>();
+            InitializeMacroCommand();
+        }
 
-		#endregion
+        #endregion
 
-		#region Public Methods
+        #region 公共方法
 
-		#region ICommand Members
+        #region ICommand 成员
 
-		/// <summary>
-		/// Execute this <c>MacroCommand</c>'s <i>SubCommands</i>
-		/// </summary>
-		/// <param name="notification">The <c>INotification</c> object to be passsed to each <i>SubCommand</i></param>
-		/// <remarks>
-		///     <para>The <i>SubCommands</i> will be called in First In/First Out (FIFO) order</para>
-		/// </remarks>
-		public virtual void Execute(INotification notification)
-		{
-			while (m_subCommands.Count > 0)
-			{
-				Type commandType = m_subCommands[0];
-				object commandInstance = Activator.CreateInstance(commandType);
+        /// <summary>
+        /// 执行这个 <c>MacroCommand</c> 的 <i>SubCommands</i>
+        /// </summary>
+        /// <param name="notification">要传递给每个 <i>SubCommand</i> 的 <c>INotification</c> 对象</param>
+        /// <remarks>
+        ///     <para><i>SubCommands</i> 将按先进先出（FIFO）的顺序调用。</para>
+        /// </remarks>
+        public virtual void Execute(INotification notification)
+        {
+            while (m_subCommands.Count > 0)
+            {
+                Type commandType = m_subCommands[0];
+                object commandInstance = Activator.CreateInstance(commandType);
 
-				if (commandInstance is ICommand)
-				{
-					((ICommand) commandInstance).Execute(notification);
-				}
+                if (commandInstance is ICommand)
+                {
+                    ((ICommand)commandInstance).Execute(notification);
+                }
 
-				m_subCommands.RemoveAt(0);
-			}
-		}
+                m_subCommands.RemoveAt(0);
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#endregion
+        #endregion
 
-		#region Protected & Internal Methods
+        #region 受保护的 & 内部方法
 
-		/// <summary>
-        /// Initialize the <c>MacroCommand</c>
+        /// <summary>
+        /// 初始化 <c>MacroCommand</c>
         /// </summary>
         /// <remarks>
-        ///     <para>In your subclass, override this method to initialize the <c>MacroCommand</c>'s <i>SubCommand</i> list with <c>ICommand</c> class references like this:</para>
+        ///     <para>在你的子类中，重写此方法以初始化 <c>MacroCommand</c> 的 <i>SubCommand</i> 列表，像这样：</para>
         ///     <example>
         ///         <code>
-        ///             // Initialize MyMacroCommand
-        ///             protected override initializeMacroCommand( )
+        ///             // 初始化 MyMacroCommand
+        ///             protected override initializeMacroCommand()
         ///             {
         ///                 addSubCommand( com.me.myapp.controller.FirstCommand );
         ///                 addSubCommand( com.me.myapp.controller.SecondCommand );
@@ -95,30 +95,30 @@ namespace PureMVC.Patterns
         ///             }
         ///         </code>
         ///     </example>
-        ///     <para>Note that <i>SubCommand</i>s may be any <c>ICommand</c> implementor, <c>MacroCommand</c>s or <c>SimpleCommands</c> are both acceptable</para>
+        ///     <para>注意 <i>SubCommand</i> 可以是任何 <c>ICommand</c> 实现者，<c>MacroCommand</c> 或 <c>SimpleCommand</c> 都可以接受。</para>
         /// </remarks>
-		protected virtual void InitializeMacroCommand()
-		{
-		}
+        protected virtual void InitializeMacroCommand()
+        {
+        }
 
         /// <summary>
-        /// Add a <i>SubCommand</i>
+        /// 添加一个 <i>SubCommand</i>
         /// </summary>
-        /// <param name="commandType">A a reference to the <c>Type</c> of the <c>ICommand</c></param>
+        /// <param name="commandType">一个指向 <c>ICommand</c> 类型的引用</param>
         /// <remarks>
-        ///     <para>The <i>SubCommands</i> will be called in First In/First Out (FIFO) order</para>
+        ///     <para><i>SubCommands</i> 将按先进先出（FIFO）的顺序调用。</para>
         /// </remarks>
         protected void AddSubCommand(Type commandType)
-		{
+        {
             m_subCommands.Add(commandType);
-		}
+        }
 
-		#endregion
+        #endregion
 
-		#region Members
+        #region 成员
 
-		private IList<Type> m_subCommands;
+        private IList<Type> m_subCommands;
 
-		#endregion
-	}
+        #endregion
+    }
 }

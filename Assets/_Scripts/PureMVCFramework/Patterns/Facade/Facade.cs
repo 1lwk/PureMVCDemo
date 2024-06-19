@@ -3,7 +3,10 @@
  PureMVC - Copyright(c) 2006-08 Futurescale, Inc., Some rights reserved. 
  Your reuse is governed by the Creative Commons Attribution 3.0 License 
 */
-
+/*
+   这个代码展示了一个基于PureMVC框架的单例`Facade`类的实现，并且包含了一些Unity相关的管理器代码。我们将详细解释每个部分，包括中文注释和设计模式的应用
+   这个 `Facade` 类实现了 PureMVC 框架的核心功能，同时扩展了 Unity 的管理器功能。通过单例模式和 MVC 设计模式的结合，实现了对应用程序各个部分的统一管理。
+ */
 #region Using
 
 using System;
@@ -138,376 +141,351 @@ namespace PureMVC.Patterns
 	/// <see cref="PureMVC.Patterns.SimpleCommand"/>
 	/// <see cref="PureMVC.Patterns.MacroCommand"/>
     public class Facade : IFacade
-	{
-		#region Constructors
+    {
+        #region 构造函数
 
-		/// <summary>
-        /// Constructor that initializes the Facade
+        /// <summary>
+        /// 初始化 Facade 的构造函数
         /// </summary>
         /// <remarks>
-        ///     <para>This <c>IFacade</c> implementation is a Singleton, so you should not call the constructor directly, but instead call the static Singleton Factory method <c>Facade.Instance</c></para>
+        ///     <para>这个 <c>IFacade</c> 实现是一个单例，因此你不应该直接调用构造函数，而是调用静态单例工厂方法 <c>Facade.Instance</c></para>
         /// </remarks>
-        protected Facade() 
+        protected Facade()
         {
-			InitializeFacade();
-		}
+            InitializeFacade();
+        }
 
-		#endregion
+        #endregion
 
-		#region Public Methods
+        #region 公共方法
 
-		#region IFacade Members
+        #region IFacade 成员
 
-		#region Proxy
+        #region Proxy
 
-		/// <summary>
-		/// Register an <c>IProxy</c> with the <c>Model</c> by name
-		/// </summary>
-		/// <param name="proxy">The <c>IProxy</c> to be registered with the <c>Model</c></param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
-		public virtual void RegisterProxy(IProxy proxy)
-		{
-			// The model is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the model.
-			m_model.RegisterProxy(proxy);
-		}
+        /// <summary>
+        /// 按名称在 <c>Model</c> 中注册一个 <c>IProxy</c>
+        /// </summary>
+        /// <param name="proxy">要在 <c>Model</c> 中注册的 <c>IProxy</c></param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
+        public virtual void RegisterProxy(IProxy proxy)
+        {
+            m_model.RegisterProxy(proxy);
+        }
 
-		/// <summary>
-		/// Retrieve a <c>IProxy</c> from the <c>Model</c> by name
-		/// </summary>
-		/// <param name="proxyName">The name of the <c>IProxy</c> instance to be retrieved</param>
-		/// <returns>The <c>IProxy</c> previously regisetered by <c>proxyName</c> with the <c>Model</c></returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 按名称从 <c>Model</c> 中检索一个 <c>IProxy</c>
+        /// </summary>
+        /// <param name="proxyName">要检索的 <c>IProxy</c> 实例的名称</param>
+        /// <returns>之前通过 <c>proxyName</c> 在 <c>Model</c> 中注册的 <c>IProxy</c></returns>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual IProxy RetrieveProxy(string proxyName)
-		{
-			// The model is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the model.
-			return m_model.RetrieveProxy(proxyName);
-		}
+        {
+            return m_model.RetrieveProxy(proxyName);
+        }
 
-		/// <summary>
-		/// Remove an <c>IProxy</c> instance from the <c>Model</c> by name
-		/// </summary>
-		/// <param name="proxyName">The <c>IProxy</c> to remove from the <c>Model</c></param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 按名称从 <c>Model</c> 中移除一个 <c>IProxy</c> 实例
+        /// </summary>
+        /// <param name="proxyName">要从 <c>Model</c> 中移除的 <c>IProxy</c></param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual IProxy RemoveProxy(string proxyName)
-		{
-			// The model is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the model.
-			return m_model.RemoveProxy(proxyName);
-		}
+        {
+            return m_model.RemoveProxy(proxyName);
+        }
 
-		/// <summary>
-		/// Check if a Proxy is registered
-		/// </summary>
-		/// <param name="proxyName">The name of the <c>IProxy</c> instance to check for</param>
-		/// <returns>whether a Proxy is currently registered with the given <c>proxyName</c>.</returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 检查是否注册了一个 Proxy
+        /// </summary>
+        /// <param name="proxyName">要检查的 <c>IProxy</c> 实例的名称</param>
+        /// <returns>当前是否注册了给定 <c>proxyName</c> 的 Proxy。</returns>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual bool HasProxy(string proxyName)
-		{
-			// The model is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the model.
-			return m_model.HasProxy(proxyName);
-		}
+        {
+            return m_model.HasProxy(proxyName);
+        }
 
-		#endregion
+        #endregion
 
-		#region Command
+        #region Command
 
-		/// <summary>
-		/// Register an <c>ICommand</c> with the <c>Controller</c>
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotification</c> to associate the <c>ICommand</c> with.</param>
-		/// <param name="commandType">A reference to the <c>Type</c> of the <c>ICommand</c></param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 在 <c>Controller</c> 中注册一个 <c>ICommand</c>
+        /// </summary>
+        /// <param name="notificationName">与 <c>ICommand</c> 关联的 <c>INotification</c> 的名称。</param>
+        /// <param name="commandType"> <c>ICommand</c> 的类型引用</param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void RegisterCommand(string notificationName, Type commandType)
-		{
-			// The controller is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the controller.
-			m_controller.RegisterCommand(notificationName, commandType);
-		}
+        {
+            m_controller.RegisterCommand(notificationName, commandType);
+        }
 
-		/// <summary>
-		/// Remove a previously registered <c>ICommand</c> to <c>INotification</c> mapping from the Controller.
-		/// </summary>
-		/// <param name="notificationName">TRemove a previously registered <c>ICommand</c> to <c>INotification</c> mapping from the Controller.</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 从控制器中移除先前注册的 <c>ICommand</c> 到 <c>INotification</c> 的映射。
+        /// </summary>
+        /// <param name="notificationName">从控制器中移除先前注册的 <c>ICommand</c> 到 <c>INotification</c> 的映射。</param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void RemoveCommand(string notificationName)
-		{
-			// The controller is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the controller.
-			m_controller.RemoveCommand(notificationName);
-		}
+        {
+            m_controller.RemoveCommand(notificationName);
+        }
 
-		/// <summary>
-		/// Check if a Command is registered for a given Notification 
-		/// </summary>
-		/// <param name="notificationName">The name of the <c>INotification</c> to check for.</param>
-		/// <returns>whether a Command is currently registered for the given <c>notificationName</c>.</returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 检查是否为给定的通知注册了命令
+        /// </summary>
+        /// <param name="notificationName">要检查的 <c>INotification</c> 的名称。</param>
+        /// <returns>当前是否为给定的 <c>notificationName</c> 注册了命令。</returns>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual bool HasCommand(string notificationName)
-		{
-			// The controller is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the controller.
-			return m_controller.HasCommand(notificationName);
-		}
+        {
+            return m_controller.HasCommand(notificationName);
+        }
 
-		#endregion
+        #endregion
 
-		#region Mediator
+        #region Mediator
 
-		/// <summary>
-		/// Register an <c>IMediator</c> instance with the <c>View</c>
-		/// </summary>
-		/// <param name="mediator">A reference to the <c>IMediator</c> instance</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 在 <c>View</c> 中注册一个 <c>IMediator</c> 实例
+        /// </summary>
+        /// <param name="mediator">对 <c>IMediator</c> 实例的引用</param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void RegisterMediator(IMediator mediator)
-		{
-			// The view is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the view.
-			m_view.RegisterMediator(mediator);
-		}
+        {
+            m_view.RegisterMediator(mediator);
+        }
 
-		/// <summary>
-		/// Retrieve an <c>IMediator</c> instance from the <c>View</c>
-		/// </summary>
-		/// <param name="mediatorName">The name of the <c>IMediator</c> instance to retrieve</param>
-		/// <returns>The <c>IMediator</c> previously registered with the given <c>mediatorName</c></returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 从 <c>View</c> 中检索一个 <c>IMediator</c> 实例
+        /// </summary>
+        /// <param name="mediatorName">要检索的 <c>IMediator</c> 实例的名称</param>
+        /// <returns>之前通过给定的 <c>mediatorName</c> 注册的 <c>IMediator</c></returns>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual IMediator RetrieveMediator(string mediatorName)
-		{
-			// The view is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the view.
-			return m_view.RetrieveMediator(mediatorName);
-		}
+        {
+            return m_view.RetrieveMediator(mediatorName);
+        }
 
-		/// <summary>
-		/// Remove a <c>IMediator</c> instance from the <c>View</c>
-		/// </summary>
-		/// <param name="mediatorName">The name of the <c>IMediator</c> instance to be removed</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 从 <c>View</c> 中移除一个 <c>IMediator</c> 实例
+        /// </summary>
+        /// <param name="mediatorName">要移除的 <c>IMediator</c> 实例的名称</param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual IMediator RemoveMediator(string mediatorName)
-		{
-			// The view is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the view.
-			return m_view.RemoveMediator(mediatorName);
-		}
+        {
+            return m_view.RemoveMediator(mediatorName);
+        }
 
-		/// <summary>
-		/// Check if a Mediator is registered or not
-		/// </summary>
-		/// <param name="mediatorName">The name of the <c>IMediator</c> instance to check for</param>
-		/// <returns>whether a Mediator is registered with the given <code>mediatorName</code>.</returns>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 检查是否注册了一个 Mediator
+        /// </summary>
+        /// <param name="mediatorName">要检查的 <c>IMediator</c> 实例的名称</param>
+        /// <returns>当前是否为给定的 <code>mediatorName</code> 注册了 Mediator。</returns>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual bool HasMediator(string mediatorName)
-		{
-			// The view is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the view.
-			return m_view.HasMediator(mediatorName);
-		}
+        {
+            return m_view.HasMediator(mediatorName);
+        }
 
-		#endregion
+        #endregion
 
-		#region Observer
+        #region Observer
 
-		/// <summary>
-		/// Notify <c>Observer</c>s of an <c>INotification</c>
-		/// </summary>
-		/// <remarks>This method is left public mostly for backward compatibility, and to allow you to send custom notification classes using the facade.</remarks>
-		/// <remarks>Usually you should just call sendNotification and pass the parameters, never having to construct the notification yourself.</remarks>
-		/// <param name="notification">The <c>INotification</c> to have the <c>View</c> notify observers of</param>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 通知 <c>Observer</c> 一个 <c>INotification</c>
+        /// </summary>
+        /// <remarks>此方法主要为了向后兼容，并允许你使用 Facade 发送自定义的通知类。</remarks>
+        /// <remarks>通常你应该直接调用 sendNotification 并传递参数，而不需要自己构建通知实例。</remarks>
+        /// <param name="notification">要通知观察者的 <c>INotification</c></param>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void NotifyObservers(INotification notification)
-		{
-			// The view is initialized in the constructor of the singleton, so this call should be thread safe.
-			// This method is thread safe on the view.
-			m_view.NotifyObservers(notification);
-		}
+        {
+            m_view.NotifyObservers(notification);
+        }
 
-		#endregion
+        #endregion
 
-		#endregion
+        #endregion
 
-		#region INotifier Members
+        #region INotifier 成员
 
-		/// <summary>
-		/// Send an <c>INotification</c>
-		/// </summary>
-		/// <param name="notificationName">The name of the notiification to send</param>
-		/// <remarks>Keeps us from having to construct new notification instances in our implementation code</remarks>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 发送一个 <c>INotification</c>
+        /// </summary>
+        /// <param name="notificationName">要发送的通知名称</param>
+        /// <remarks>使我们在实现代码中不必构建新的通知实例</remarks>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void SendNotification(string notificationName)
-		{
-			NotifyObservers(new Notification(notificationName));
-		}
+        {
+            NotifyObservers(new Notification(notificationName));
+        }
 
-		/// <summary>
-		/// Send an <c>INotification</c>
-		/// </summary>
-		/// <param name="notificationName">The name of the notification to send</param>
-		/// <param name="body">The body of the notification</param>
-		/// <remarks>Keeps us from having to construct new notification instances in our implementation code</remarks>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 发送一个 <c>INotification</c>
+        /// </summary>
+        /// <param name="notificationName">要发送的通知名称</param>
+        /// <param name="body">通知的主体</param>
+        /// <remarks>使我们在实现代码中不必构建新的通知实例</remarks>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void SendNotification(string notificationName, object body)
-		{
-			NotifyObservers(new Notification(notificationName, body));
-		}
+        {
+            NotifyObservers(new Notification(notificationName, body));
+        }
 
-		/// <summary>
-		/// Send an <c>INotification</c>
-		/// </summary>
-		/// <param name="notificationName">The name of the notification to send</param>
-		/// <param name="body">The body of the notification</param>
-		/// <param name="type">The type of the notification</param>
-		/// <remarks>Keeps us from having to construct new notification instances in our implementation code</remarks>
-		/// <remarks>This method is thread safe and needs to be thread safe in all implementations.</remarks>
+        /// <summary>
+        /// 发送一个 <c>INotification</c>
+        /// </summary>
+        /// <param name="notificationName">要发送的通知名称</param>
+        /// <param name="body">通知的主体</param>
+        /// <param name="type">通知的类型</param>
+        /// <remarks>使我们在实现代码中不必构建新的通知实例</remarks>
+        /// <remarks>此方法是线程安全的，并且在所有实现中都需要是线程安全的。</remarks>
         public virtual void SendNotification(string notificationName, object body, string type)
-		{
-			NotifyObservers(new Notification(notificationName, body, type));
-		}
+        {
+            NotifyObservers(new Notification(notificationName, body, type));
+        }
 
-		#endregion
+        #endregion
 
-		#endregion
+        #region 访问器
 
-		#region Accessors
+        /// <summary>
+        /// Facade 单例工厂方法。此方法是线程安全的。
+        /// </summary>
+        public static IFacade Instance
+        {
+            get
+            {
+                if (m_instance == null)
+                {
+                    lock (m_staticSyncRoot)
+                    {
+                        if (m_instance == null) m_instance = new Facade();
+                    }
+                }
 
-		/// <summary>
-		/// Facade Singleton Factory method.  This method is thread safe.
-		/// </summary>
-		public static IFacade Instance
-		{
-			get
-			{
-				if (m_instance == null)
-				{
-					lock (m_staticSyncRoot)
-					{
-						if (m_instance == null) m_instance = new Facade();
-					}
-				}
+                return m_instance;
+            }
+        }
 
-				return m_instance;
-			}
-		}
+        #endregion
 
-		#endregion
+        #region 受保护的 & 内部方法
 
-		#region Protected & Internal Methods
-
-		/// <summary>
-        /// Explicit static constructor to tell C# compiler 
-        /// not to mark type as beforefieldinit
+        /// <summary>
+        /// 显式静态构造函数，告诉 C# 编译器不要将类型标记为 beforefieldinit
         ///</summary>
         static Facade()
         {
         }
 
         /// <summary>
-        /// Initialize the Singleton <c>Facade</c> instance
+        /// 初始化单例 <c>Facade</c> 实例
         /// </summary>
         /// <remarks>
-        /// <para>Called automatically by the constructor. Override in your subclass to do any subclass specific initializations. Be sure to call <c>base.initializeFacade()</c>, though</para>
+        /// <para>由构造函数自动调用。在你的子类中重写以进行任何子类特定的初始化。但要确保调用 <c>base.initializeFacade()</c></para>
         /// </remarks>
         protected virtual void InitializeFacade()
         {
-			InitializeModel();
-			InitializeController();
-			InitializeView();
-		}
+            InitializeModel();
+            InitializeController();
+            InitializeView();
+        }
 
         /// <summary>
-        /// Initialize the <c>Controller</c>
+        /// 初始化 <c>Controller</c>
         /// </summary>
         /// <remarks>
-        ///     <para>Called by the <c>initializeFacade</c> method. Override this method in your subclass of <c>Facade</c> if one or both of the following are true:</para>
+        ///     <para>由 <c>initializeFacade</c> 方法调用。如果以下情况之一为真，请在 <c>Facade</c> 的子类中重写此方法：</para>
         ///     <list type="bullet">
-        ///         <item>You wish to initialize a different <c>IController</c></item>
-        ///         <item>You have <c>Commands</c> to register with the <c>Controller</c> at startup</item>
+        ///         <item>你希望初始化不同的 <c>IController</c></item>
+        ///         <item>你有 <c>Commands</c> 需要在启动时向 <c>Controller</c> 注册</item>
         ///     </list>
-        ///     <para>If you don't want to initialize a different <c>IController</c>, call <c>base.initializeController()</c> at the beginning of your method, then register <c>Command</c>s</para>
+        ///     <para>如果你不想初始化不同的 <c>IController</c>，请在你的方法开头调用 <c>base.initializeController()</c>，然后注册 <c>Command</c></para>
         /// </remarks>
-		protected virtual void InitializeController()
+        protected virtual void InitializeController()
         {
-			if (m_controller != null) return;
-			m_controller = Controller.Instance;
-		}
+            if (m_controller != null) return;
+            m_controller = Controller.Instance;
+        }
 
         /// <summary>
-        /// Initialize the <c>Model</c>
+        /// 初始化 <c>Model</c>
         /// </summary>
         /// <remarks>
-        ///     <para>Called by the <c>initializeFacade</c> method. Override this method in your subclass of <c>Facade</c> if one or both of the following are true:</para>
+        ///     <para>由 <c>initializeFacade</c> 方法调用。如果以下情况之一为真，请在 <c>Facade</c> 的子类中重写此方法：</para>
         ///     <list type="bullet">
-        ///         <item>You wish to initialize a different <c>IModel</c></item>
-        ///         <item>You have <c>Proxy</c>s to register with the Model that do not retrieve a reference to the Facade at construction time</item>
+        ///         <item>你希望初始化不同的 <c>IModel</c></item>
+        ///         <item>你有 <c>Proxy</c> 需要在构造时不获取 Facade 引用的情况下向 <c>Model</c> 注册</item>
         ///     </list>
-        ///     <para>If you don't want to initialize a different <c>IModel</c>, call <c>base.initializeModel()</c> at the beginning of your method, then register <c>Proxy</c>s</para>
-        ///     <para>Note: This method is <i>rarely</i> overridden; in practice you are more likely to use a <c>Command</c> to create and register <c>Proxy</c>s with the <c>Model</c>, since <c>Proxy</c>s with mutable data will likely need to send <c>INotification</c>s and thus will likely want to fetch a reference to the <c>Facade</c> during their construction</para>
+        ///     <para>如果你不想初始化不同的 <c>IModel</c>，请在你的方法开头调用 <c>base.initializeModel()</c>，然后注册 <c>Proxy</c></para>
+        ///     <para>注意：此方法很少被重写；实际上，你更有可能使用 <c>Command</c> 来创建和注册 <c>Proxy</c> 到 <c>Model</c>，因为具有可变数据的 <c>Proxy</c> 可能需要发送 <c>INotification</c>，因此可能希望在其构造期间获取 <c>Facade</c> 的引用</para>
         /// </remarks>
         protected virtual void InitializeModel()
         {
-			if (m_model != null) return;
-			m_model = Model.Instance;
-		}
-		
+            if (m_model != null) return;
+            m_model = Model.Instance;
+        }
+
         /// <summary>
-        /// Initialize the <c>View</c>
+        /// 初始化 <c>View</c>
         /// </summary>
         /// <remarks>
-        ///     <para>Called by the <c>initializeFacade</c> method. Override this method in your subclass of <c>Facade</c> if one or both of the following are true:</para>
+        ///     <para>由 <c>initializeFacade</c> 方法调用。如果以下情况之一为真，请在 <c>Facade</c> 的子类中重写此方法：</para>
         ///     <list type="bullet">
-        ///         <item>You wish to initialize a different <c>IView</c></item>
-        ///         <item>You have <c>Observers</c> to register with the <c>View</c></item>
+        ///         <item>你希望初始化不同的 <c>IView</c></item>
+        ///         <item>你有需要向 <c>View</c> 注册的 <c>Observers</c></item>
         ///     </list>
-        ///     <para>If you don't want to initialize a different <c>IView</c>, call <c>base.initializeView()</c> at the beginning of your method, then register <c>IMediator</c> instances</para>
-        ///     <para>Note: This method is <i>rarely</i> overridden; in practice you are more likely to use a <c>Command</c> to create and register <c>Mediator</c>s with the <c>View</c>, since <c>IMediator</c> instances will need to send <c>INotification</c>s and thus will likely want to fetch a reference to the <c>Facade</c> during their construction</para>
+        ///     <para>如果你不想初始化不同的 <c>IView</c>，请在你的方法开头调用 <c>base.initializeView()</c>，然后注册 <c>IMediator</c> 实例</para>
+        ///     <para>注意：此方法很少被重写；实际上，你更有可能使用 <c>Command</c> 来创建和注册 <c>Mediator</c> 到 <c>View</c>，因为 <c>IMediator</c> 实例需要发送 <c>INotification</c>，因此可能希望在其构造期间获取 <c>Facade</c> 的引用</para>
         /// </remarks>
         protected virtual void InitializeView()
         {
-			if (m_view != null) return;
-			m_view = View.Instance;
-		}
+            if (m_view != null) return;
+            m_view = View.Instance;
+        }
 
-		#endregion
+        #endregion
 
-		#region Members
-
-		/// <summary>
-        /// Private reference to the Controller
-        /// </summary>
-		protected IController m_controller;
+        #region 成员
 
         /// <summary>
-        /// Private reference to the Model
+        /// 私有引用到 Controller
+        /// </summary>
+        protected IController m_controller;
+
+        /// <summary>
+        /// 私有引用到 Model
         /// </summary>
         protected IModel m_model;
 
         /// <summary>
-        /// Private reference to the View
+        /// 私有引用到 View
         /// </summary>
         protected IView m_view;
 
         /// <summary>
-        /// The Singleton Facade Instance
+        /// 单例 Facade 实例
         /// </summary>
         protected static volatile IFacade m_instance;
 
-		/// <summary>
-		/// Used for locking the instance calls
-		/// </summary>
-		protected static readonly object m_staticSyncRoot = new object();
+        /// <summary>
+        /// 用于锁定实例调用
+        /// </summary>
+        protected static readonly object m_staticSyncRoot = new object();
 
-		#endregion
+        #endregion
 
-
-        //SimpleFramework Code By Jarjin lee
+        // SimpleFramework 代码由 Jarjin Lee 编写
         static GameObject m_GameManager;
         static Dictionary<string, object> m_Managers = new Dictionary<string, object>();
 
-        GameObject AppGameManager {
-            get {
-                if (m_GameManager == null) {
+        GameObject AppGameManager
+        {
+            get
+            {
+                if (m_GameManager == null)
+                {
                     m_GameManager = GameObject.Find("GameManager");
                 }
                 return m_GameManager;
@@ -519,23 +497,27 @@ namespace PureMVC.Patterns
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="typeName"></param>
-        /// <returns></returns>
-        public void AddManager(string typeName, object obj) {
-            if (!m_Managers.ContainsKey(typeName)) {
+        /// <param name="obj"></param>
+        public void AddManager(string typeName, object obj)
+        {
+            if (!m_Managers.ContainsKey(typeName))
+            {
                 m_Managers.Add(typeName, obj);
             }
         }
 
         /// <summary>
-        /// 添加Unity对象
+        /// 添加 Unity 对象
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public T AddManager<T>(string typeName) where T : Component {
+        public T AddManager<T>(string typeName) where T : Component
+        {
             object result = null;
             m_Managers.TryGetValue(typeName, out result);
-            if (result != null) {
+            if (result != null)
+            {
                 return (T)result;
             }
             Component c = AppGameManager.AddComponent<T>();
@@ -549,8 +531,10 @@ namespace PureMVC.Patterns
         /// <typeparam name="T"></typeparam>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public T GetManager<T>(string typeName) where T : class {
-            if (!m_Managers.ContainsKey(typeName)) {
+        public T GetManager<T>(string typeName) where T : class
+        {
+            if (!m_Managers.ContainsKey(typeName))
+            {
                 return default(T);
             }
             object manager = null;
@@ -562,17 +546,21 @@ namespace PureMVC.Patterns
         /// 删除管理器
         /// </summary>
         /// <param name="typeName"></param>
-        public void RemoveManager(string typeName) {
-            if (!m_Managers.ContainsKey(typeName)) {
+        public void RemoveManager(string typeName)
+        {
+            if (!m_Managers.ContainsKey(typeName))
+            {
                 return;
             }
             object manager = null;
             m_Managers.TryGetValue(typeName, out manager);
             Type type = manager.GetType();
-            if (type.IsSubclassOf(typeof(MonoBehaviour))) {
+            if (type.IsSubclassOf(typeof(MonoBehaviour)))
+            {
                 GameObject.Destroy((Component)manager);
             }
             m_Managers.Remove(typeName);
         }
-	}
+    }
+    #endregion
 }

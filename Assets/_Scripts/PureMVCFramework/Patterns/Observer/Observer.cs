@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  PureMVC C# Port by Andy Adamczak <andy.adamczak@puremvc.org>, et al.
  PureMVC - Copyright(c) 2006-08 Futurescale, Inc., Some rights reserved. 
  Your reuse is governed by the Creative Commons Attribution 3.0 License 
@@ -7,6 +7,7 @@
 #region Using
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 
 using PureMVC.Interfaces;
@@ -16,144 +17,149 @@ using PureMVC.Interfaces;
 namespace PureMVC.Patterns
 {
     /// <summary>
-    /// A base <c>IObserver</c> implementation
+    /// 基础的 <c>IObserver</c> 实现
     /// </summary>
     /// <remarks>
-    ///     <para>An <c>Observer</c> is an object that encapsulates information about an interested object with a method that should be called when a particular <c>INotification</c> is broadcast</para>
-    ///     <para>In PureMVC, the <c>Observer</c> class assumes these responsibilities:</para>
+    ///     <para><c>Observer</c> 是一个对象，封装了关于有兴趣对象的信息，这些对象的方法应在特定 <c>INotification</c> 广播时被调用</para>
+    ///     <para>在 PureMVC 中，<c>Observer</c> 类承担以下职责：</para>
     ///     <list type="bullet">
-    ///         <item>Encapsulate the notification (callback) method of the interested object</item>
-    ///         <item>Encapsulate the notification context (this) of the interested object</item>
-    ///         <item>Provide methods for setting the notification method and context</item>
-    ///         <item>Provide a method for notifying the interested object</item>
+    ///         <item>封装有兴趣对象的通知（回调）方法</item>
+    ///         <item>封装有兴趣对象的通知上下文（this）</item>
+    ///         <item>提供设置通知方法和上下文的方法</item>
+    ///         <item>提供通知有兴趣对象的方法</item>
     ///     </list>
     /// </remarks>
-	/// <see cref="PureMVC.Core.View"/>
-	/// <see cref="PureMVC.Patterns.Notification"/>
-	public class Observer : IObserver
-	{
-		#region Constructors
+    /// <see cref="PureMVC.Core.View"/>
+    /// <see cref="PureMVC.Patterns.Notification"/>
+    public class Observer : IObserver
+    {
+        #region 构造函数
 
-		/// <summary>
-		/// Constructs a new observer with the specified notification method and context
-		/// </summary>
-		/// <param name="notifyMethod">The notification method of the interested object</param>
-		/// <param name="notifyContext">The notification context of the interested object</param>
-		/// <remarks>
-		///     <para>The notification method on the interested object should take on parameter of type <c>INotification</c></para>
-		/// </remarks>
-		public Observer(string notifyMethod, object notifyContext)
-		{
-			m_notifyMethod = notifyMethod;
-			m_notifyContext = notifyContext;
-		}
+        /// <summary>
+        /// 使用指定的通知方法和上下文构造一个新的观察者
+        /// </summary>
+        /// <param name="notifyMethod">有兴趣对象的通知方法</param>
+        /// <param name="notifyContext">有兴趣对象的通知上下文</param>
+        /// <remarks>
+        ///     <para>有兴趣对象的通知方法应接受一个类型为 <c>INotification</c> 的参数</para>
+        /// </remarks>
+        public Observer(string notifyMethod, object notifyContext)
+        {
+            m_notifyMethod = notifyMethod;
+            m_notifyContext = notifyContext;
+        }
 
-		#endregion
+        #endregion
 
-		#region Public Methods
+        #region 公共方法
 
-		#region IObserver Members
+        #region IObserver 成员
 
-		/// <summary>
-		/// Notify the interested object
-		/// </summary>
-		/// <remarks>This method is thread safe</remarks>
-		/// <param name="notification">The <c>INotification</c> to pass to the interested object's notification method</param>
-		public virtual void NotifyObserver(INotification notification)
-		{
-			object context;
-			string method;
+        /// <summary>
+        /// 通知有兴趣的对象
+        /// </summary>
+        /// <remarks>此方法是线程安全的</remarks>
+        /// <param name="notification">传递给有兴趣对象的通知方法的 <c>INotification</c></param>
+        public virtual void NotifyObserver(INotification notification)
+        {
+            object context;
+            string method;
 
-			// Retrieve the current state of the object, then notify outside of our thread safe block
-			lock (m_syncRoot)
-			{
-				context = NotifyContext;
-				method = NotifyMethod;
-			}
+            // 检索对象的当前状态，然后在我们的线程安全块之外通知
+            lock (m_syncRoot)
+            {
+                context = NotifyContext;
+                method = NotifyMethod;
+            }
 
-			Type t = context.GetType();
-			BindingFlags f = BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase;
-			MethodInfo mi = t.GetMethod(method, f);
-			mi.Invoke(context, new object[] { notification });
-		}
+            ///通过反射机制在context对象上查找名称为method的方法，并使用notification参数调用该方法。
+            ///通过这种方式，可以动态调用对象的方法，而无需在编译时确定具体的方法名和参数。
+            Type t = context.GetType();
+            BindingFlags f = BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase;
+            UnityEngine.Debug.Log(method);
+            //通过method获取到方法
+            MethodInfo mi = t.GetMethod(method, f);
+            //调用将context传输过去这个 方法就是controller中的ExecuteCommand
+            mi.Invoke(context, new object[] { notification });
+        }
 
-		/// <summary>
-		/// Compare an object to the notification context
-		/// </summary>
-		/// <remarks>This method is thread safe</remarks>
-		/// <param name="obj">The object to compare</param>
-		/// <returns>Indicating if the object and the notification context are the same</returns>
-		public virtual bool CompareNotifyContext(object obj)
-		{
-			lock (m_syncRoot)
-			{
-				// Compare on the current state
-				return NotifyContext.Equals(obj);
-			}
-		}
+        /// <summary>
+        /// 将一个对象与通知上下文进行比较
+        /// </summary>
+        /// <remarks>此方法是线程安全的</remarks>
+        /// <param name="obj">要比较的对象</param>
+        /// <returns>指示对象和通知上下文是否相同</returns>
+        public virtual bool CompareNotifyContext(object obj)
+        {
+            lock (m_syncRoot)
+            {
+                // 比较当前状态
+                return NotifyContext.Equals(obj);
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#endregion
+        #endregion
 
-		#region Accessors
+        #region 访问器
 
-		/// <summary>
-		/// The notification (callback) method of the interested object
-		/// </summary>
-		/// <remarks>The notification method should take one parameter of type <c>INotification</c></remarks>
-		/// <remarks>This accessor is thread safe</remarks>
-		public virtual string NotifyMethod
-		{
-			private get
-			{
-				// Setting and getting of reference types is atomic, no need to lock here
-				return m_notifyMethod;
-			}
-			set
-			{
-				// Setting and getting of reference types is atomic, no need to lock here
-				m_notifyMethod = value;
-			}
-		}
+        /// <summary>
+        /// 有兴趣对象的通知（回调）方法
+        /// </summary>
+        /// <remarks>通知方法应接受一个类型为 <c>INotification</c> 的参数</remarks>
+        /// <remarks>此访问器是线程安全的</remarks>
+        public virtual string NotifyMethod
+        {
+            private get
+            {
+                // 引用类型的设置和获取是原子的，这里不需要锁定
+                return m_notifyMethod;
+            }
+            set
+            {
+                // 引用类型的设置和获取是原子的，这里不需要锁定
+                m_notifyMethod = value;
+            }
+        }
 
-		/// <summary>
-		/// The notification context (this) of the interested object
-		/// </summary>
-		/// <remarks>This accessor is thread safe</remarks>
-		public virtual object NotifyContext
-		{
-			private get
-			{
-				// Setting and getting of reference types is atomic, no need to lock here
-				return m_notifyContext;
-			}
-			set
-			{
-				// Setting and getting of reference types is atomic, no need to lock here
-				m_notifyContext = value;
-			}
-		}
+        /// <summary>
+        /// 有兴趣对象的通知上下文（this）
+        /// </summary>
+        /// <remarks>此访问器是线程安全的</remarks>
+        public virtual object NotifyContext
+        {
+            private get
+            {
+                // 引用类型的设置和获取是原子的，这里不需要锁定
+                return m_notifyContext;
+            }
+            set
+            {
+                // 引用类型的设置和获取是原子的，这里不需要锁定
+                m_notifyContext = value;
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region Members
+        #region 成员
 
-		/// <summary>
-		/// Holds the notify method name.
-		/// </summary>
-		private string m_notifyMethod;
+        /// <summary>
+        /// 保存通知方法名称
+        /// </summary>
+        private string m_notifyMethod;
 
-		/// <summary>
-		/// Holds the notify context.
-		/// </summary>
-		private object m_notifyContext;
+        /// <summary>
+        /// 保存通知上下文
+        /// </summary>
+        private object m_notifyContext;
 
-		/// <summary>
-		/// Used for locking
-		/// </summary>
-		protected readonly object m_syncRoot = new object();
+        /// <summary>
+        /// 用于锁定
+        /// </summary>
+        protected readonly object m_syncRoot = new object();
 
-		#endregion
-	}
+        #endregion
+    }
 }

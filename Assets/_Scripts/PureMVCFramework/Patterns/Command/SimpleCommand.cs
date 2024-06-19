@@ -17,33 +17,33 @@ using PureMVC.Patterns;
 namespace PureMVC.Patterns
 {
     /// <summary>
-    /// A base <c>ICommand</c> implementation
+    /// 一个基础的 <c>ICommand</c> 实现
     /// </summary>
     /// <remarks>
-    ///     <para>Your subclass should override the <c>execute</c> method where your business logic will handle the <c>INotification</c></para>
+    ///     <para>你的子类应重写 <c>execute</c> 方法，在该方法中你的业务逻辑将处理 <c>INotification</c></para>
     /// </remarks>
 	/// <see cref="PureMVC.Core.Controller"/>
 	/// <see cref="PureMVC.Patterns.Notification"/>
 	/// <see cref="PureMVC.Patterns.MacroCommand"/>
     public class SimpleCommand : Notifier, ICommand, INotifier
     {
-		#region Public Methods
+        #region 公共方法
 
-		#region ICommand Members
+        #region ICommand 成员
 
-		/// <summary>
-        /// Fulfill the use-case initiated by the given <c>INotification</c>
+        /// <summary>
+        /// 完成由给定的 <c>INotification</c> 启动的用例
         /// </summary>
-        /// <param name="notification">The <c>INotification</c> to handle</param>
+        /// <param name="notification">要处理的 <c>INotification</c></param>
         /// <remarks>
-        ///     <para>In the Command Pattern, an application use-case typically begins with some user action, which results in an <c>INotification</c> being broadcast, which is handled by business logic in the <c>execute</c> method of an <c>ICommand</c></para>
+        ///     <para>在命令模式中，应用程序用例通常从某些用户操作开始，这会导致广播一个 <c>INotification</c>，该通知由 <c>ICommand</c> 的 <c>execute</c> 方法中的业务逻辑处理</para>
         /// </remarks>
-		public virtual void Execute(INotification notification)
-		{
-		}
+        public virtual void Execute(INotification notification)
+        {
+        }
 
-		#endregion
+        #endregion
 
-		#endregion
-	}
+        #endregion
+    }
 }
